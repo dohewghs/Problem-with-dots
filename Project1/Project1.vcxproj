@@ -127,7 +127,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Dot.h" />
+    <ClInclude Include="Point.h" />
+    <ClInclude Include="Points.h" />
+    <ClInclude Include="PointsGenerator.h" />
+    <ClInclude Include="WindowRenderer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

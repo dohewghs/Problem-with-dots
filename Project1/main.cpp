@@ -1,12 +1,20 @@
 #include "WindowRenderer.h"
 #include "Points.h"
+#include "PointsGenerator.h"
 
 int main()
 {
-	Points dots;
-	dots.AddPoint(Point(10, 10, 1, color(0, 0, 0)));
+	PointsGenerator gen(std::random_device{}());
 
-	WindowRenderer renderer(dots);
+	Points dots;
+	dots.AddPoint(Point(100, 100, 1, color(0, 0, 0)));
+	dots.AddPoint(Point(200, 100, 1, color(0, 0, 0)));
+	dots.AddPoint(Point(150, 300, 1, color(0, 0, 0)));
+	dots.AddPoint(Point(430, 270, 1, color(0, 0, 0)));
+	
+	Points points = gen.genPoints(dots);
+
+	WindowRenderer renderer(points);
 
 	if (renderer.Init(L"Points Renderer", 800, 600)) 
 	{

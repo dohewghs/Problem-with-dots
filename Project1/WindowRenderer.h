@@ -44,7 +44,7 @@ private:
             HDC hdc = BeginPaint(hwnd, &ps);
 
             // Отримуємо точки з нашого класу даних
-            const auto& points = scene.getDots();
+            const auto& points = scene.getPoints();
 
             // Малюємо кожну точку на екрані
             for (const auto& pt : points) 
