@@ -26,4 +26,7 @@ public:
 	{
 		return dots;
 	}
+
+	auto begin() const { return this->dots.begin(); }
+	auto end() const { return this->dots.end(); }
 };
