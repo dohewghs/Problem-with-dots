@@ -4,19 +4,15 @@
 
 int main()
 {
+	int width = 800;
+	int height = 600;
 	PointsGenerator gen(std::random_device{}());
 
-	Points dots;
-	dots.AddPoint(Point(100, 100, 1, color(0, 0, 0)));
-	dots.AddPoint(Point(200, 100, 1, color(0, 0, 0)));
-	dots.AddPoint(Point(150, 300, 1, color(0, 0, 0)));
-	dots.AddPoint(Point(430, 270, 1, color(0, 0, 0)));
-	
-	Points points = gen.genPoints(dots);
+	Points points = gen.get_points_preset1(width, height);
 
 	WindowRenderer renderer(points);
 
-	if (renderer.Init(L"Points Renderer", 800, 600)) 
+	if (renderer.Init(L"Points Renderer", width, height)) 
 	{
 		renderer.Run();
 	}
