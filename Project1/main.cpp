@@ -1,6 +1,7 @@
 #include "WindowRenderer.h"
 #include "Points.h"
 #include "PointsGenerator.h"
+#include "Checker.h"
 
 int main()
 {
@@ -9,6 +10,9 @@ int main()
 	PointsGenerator gen(std::random_device{}());
 
 	Points points = gen.get_points_preset1(width, height);
+
+	Checker checker(Zone(0, 0, 800, 600));
+	checker.checkPoints(points);
 
 	WindowRenderer renderer(points);
 

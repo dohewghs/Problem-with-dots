@@ -27,6 +27,18 @@ public:
 		return dots;
 	}
 
+	constexpr size_t size() const noexcept
+	{
+		return dots.size();
+	}
+
+	constexpr bool empty() const noexcept
+	{
+		return dots.empty();
+	}
+
 	auto begin() const { return this->dots.begin(); }
 	auto end() const { return this->dots.end(); }
+	auto begin() { return this->dots.begin(); }
+	auto end() { return this->dots.end(); }
 };
