@@ -42,6 +42,9 @@ private:
 
 	int zones_x;
 	int zones_y;
+
+	const double radius = 50.0;
+
 public:
 	Checker(Zone zone) :
 		zone(zone),
@@ -70,7 +73,7 @@ public:
 			}
 		}*/
 
-		std::map<Zone, Points> zone_indexes;
+		std::map<Zone, Points> zones;
 
 		for (Point& pt : points)
 		{
@@ -90,14 +93,16 @@ public:
 					zone_indexes[zone] = Points();*/
 
 
-				zone_indexes[zone].AddPoint(pt);
+				zones[zone].AddPoint(pt);
 			}
 
 			// маємо індекси зон, і відповідні точки які належать певній зоні
 			// отже в зонах де велика кількість точок, можна шукати середнє значення між точками
 		}
 
-		for (const auto& pair : zone_indexes)
+		double sq_radius = this->radius * this->radius;
+
+		for (const auto& pair : zones)
 		{
 			if (pair.second.empty())
 				continue;
@@ -114,11 +119,40 @@ public:
 			x_avg /= pair.second.size();
 			y_avg /= pair.second.size();
 
-			Point avg(x_avg, y_avg, 0, color(255, 0, 0, 255));
+			Point weak_avg(x_avg, y_avg, 0, color(255, 0, 0, 255));
+			// weak_avg - середнє значення в зоні - квадраті
 
-			points.AddPoint(avg);
+			points.AddPoint(weak_avg);
+
+			x_avg = 0;
+			y_avg = 0;
+
+			size_t counter = 0;
+			for (const Point& pt : pair.second)
+			{
+				double dx = pt.x - weak_avg.x;
+				double dy = pt.y - weak_avg.y;
+
+				double distance = std::sqrt(dx * dx + dy * dy);
+
+				if (distance <= sq_radius)
+				{
+					x_avg += pt.x;
+					y_avg += pt.y;
+					++counter;
+				}
+			}
+
+			if (counter > 0)
+			{
+				x_avg /= counter;
+				y_avg /= counter;
+
+				Point strong_avg(x_avg, y_avg, 0, color(0, 0, 255, 255));
+				points.AddPoint(strong_avg);
+			}
+
 		}
-
 	}
 };
 
