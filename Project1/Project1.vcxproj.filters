@@ -21,13 +21,16 @@
     <ClInclude Include="Points.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WindowRenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="PointsGenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Checker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AppConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GuiManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
