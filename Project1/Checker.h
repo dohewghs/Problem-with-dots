@@ -3,6 +3,7 @@
 #include <iostream>
 #include <map>
 #include <numeric>
+#include "AppConfig.h"
 
 struct Zone
 {
@@ -40,22 +41,66 @@ class Checker
 private:
 	Zone zone;
 
-	int zones_x;
-	int zones_y;
-
-	const double radius = 15;
-
 public:
 	Checker(Zone zone) :
-		zone(zone),
-		zones_x(20),
-		zones_y(20)
+		zone(zone)
 	{ }
 
-	void checkPoints(Points& points)
+	//void checkPoints(const Points& points)
+	//{
+	//	
+
+	//	double sq_radius = this->radius * this->radius;
+
+	//	for (const auto& pair : zones)
+	//	{
+	//		if (pair.second.empty())
+	//			continue;
+
+	//		Point weak_avg = pair.second.average();
+	//		weak_avg.col.R = 255;
+	//		// weak_avg - середнє значення в зоні - квадраті
+
+	//		points.AddPoint(weak_avg);
+
+	//		double x_avg = 0;
+	//		double y_avg = 0;
+
+	//		size_t counter = 0;
+	//		for (const Point& pt : pair.second)
+	//		{
+	//			double dx = pt.x - weak_avg.x;
+	//			double dy = pt.y - weak_avg.y;
+
+	//			double distance = dx * dx + dy * dy;
+
+	//			if (distance <= sq_radius)
+	//			{
+	//				x_avg += pt.x;
+	//				y_avg += pt.y;
+	//				++counter;
+	//			}
+	//		}
+
+	//		if (counter > 3)
+	//		{
+	//			x_avg /= static_cast<double>(counter);
+	//			y_avg /= static_cast<double>(counter);
+
+	//			Point strong_avg(x_avg, y_avg, 0, color(0, 0, 255, 255));
+	//			points.AddPoint(strong_avg);
+	//		}
+
+	//	}
+	//}
+
+	std::map<std::pair<int, int>, Points> zoning(const Points& source, const AppConfig& config)
 	{
-		double size_x = static_cast<double>(zone.length) / zones_x;
-		double size_y = static_cast<double>(zone.width) / zones_y;
+		double size_x = static_cast<double>(zone.length) / config.zones_x;
+		double size_y = static_cast<double>(zone.width) / config.zones_y;
+	
+		std::map<std::pair<int, int>, Points> zones;
+
 		/*for (int i = 0; i < zones_x; ++i)
 		{
 			for (int j = 0; j < zones_y; ++j)
@@ -66,91 +111,50 @@ public:
 				{
 					if (small_zone.contains(pt))
 					{
-						//std::cout << "HERE";
-						pt.col.R = 255;
 					}
 				}
 			}
 		}*/
 
-		std::map<std::pair<int,int>, Points> zone_indexes;
-
-		for (Point& pt : points)
+		for (const Point& pt : source)
 		{
 			int i = static_cast<int>((pt.x - zone.x) / size_x);
 			int j = static_cast<int>((pt.y - zone.y) / size_y);
 
 			// 0<i<zones_x
 			// 0<j<zones_y
-			if (0 <= i && 0 <= j && i < zones_x && j < zones_y)
+			if (0 <= i && 0 <= j && i < config.zones_x && j < config.zones_y)
 			{
 				int x = static_cast<int>(zone.x + i * size_x);
 				int y = static_cast<int>(zone.y + j * size_y);
 
-				/*if (zone_indexes.find(zone) == zone_indexes.end())
-					zone_indexes[zone] = Points();*/
-
-
-				zone_indexes[{i,j}].AddPoint(pt);
+				zones[{i, j}].AddPoint(pt);
 			}
 
 			// маємо індекси зон, і відповідні точки які належать певній зоні
 			// отже в зонах де велика кількість точок, можна шукати середнє значення між точками
 		}
 
-		double sq_radius = this->radius * this->radius;
+		return zones;
+	}
 
-		for (const auto& pair : zone_indexes)
+	Points weakAverages(const Points& points, const AppConfig& config)
+	{
+		std::map<std::pair<int, int>, Points> zones = this->zoning(points, config);
+
+		Points weakAvg;
+		for (auto pair : zones)
 		{
-			if (pair.second.empty())
+			if (pair.second.empty()) 
 				continue;
 
-			double x_avg = 0;
-			double y_avg = 0;
+			Point avg = pair.second.average();
+			avg.col.R = 255;
 
-			for (const Point& pt : pair.second)
-			{
-				x_avg += pt.x;
-				y_avg += pt.y;
-			}
-
-			x_avg /= pair.second.size();
-			y_avg /= pair.second.size();
-
-			Point weak_avg(x_avg, y_avg, 0, color(255, 0, 0, 255));
-			// weak_avg - середнє значення в зоні - квадраті
-
-			points.AddPoint(weak_avg);
-
-			x_avg = 0;
-			y_avg = 0;
-
-			size_t counter = 0;
-			for (const Point& pt : pair.second)
-			{
-				double dx = pt.x - weak_avg.x;
-				double dy = pt.y - weak_avg.y;
-
-				double distance = dx * dx + dy * dy;
-
-				if (distance <= sq_radius)
-				{
-					x_avg += pt.x;
-					y_avg += pt.y;
-					++counter;
-				}
-			}
-
-			if (counter > 3)
-			{
-				x_avg /= static_cast<double>(counter);
-				y_avg /= static_cast<double>(counter);
-
-				Point strong_avg(x_avg, y_avg, 0, color(0, 0, 255, 255));
-				points.AddPoint(strong_avg);
-			}
-
+			weakAvg.AddPoint(avg);
 		}
+
+		return weakAvg;
 	}
 };
 
