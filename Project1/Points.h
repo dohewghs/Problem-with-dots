@@ -14,7 +14,7 @@ public:
 
 	void AddPoint(Point dot)
 	{
-		this->dots.push_back(dot);
+		*this += dot;
 	}
 	
 	void clear()
@@ -41,4 +41,42 @@ public:
 	auto end() const { return this->dots.end(); }
 	auto begin() { return this->dots.begin(); }
 	auto end() { return this->dots.end(); }
+
+	Point average() const
+	{
+		double x_avg = 0;
+		double y_avg = 0;
+		double z_avg = 0;
+
+		for (Point pt : this->dots)
+		{
+			x_avg += pt.x;
+			y_avg += pt.y;
+			z_avg += pt.z;
+		}
+
+		size_t size = this->dots.size();
+
+		return Point(
+			x_avg / size, 
+			y_avg / size, 
+			z_avg / size, 
+			color(0, 0, 0, 255)
+		);
+	}
+
+	Points& operator+=(const Point& pt)
+	{
+		dots.push_back(pt);
+		return *this;
+	}
+
+	Points& operator+=(const Points& other)
+	{
+		dots.reserve(dots.size() + other.dots.size());
+
+		dots.insert(dots.end(), other.dots.begin(), other.dots.end());
+
+		return *this;
+	}
 };
