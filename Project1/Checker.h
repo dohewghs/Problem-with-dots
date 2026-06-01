@@ -7,12 +7,12 @@
 struct Zone
 {
 	//length, width, height
-	int x;
-	int y;
-	int length;
-	int width;
+	double x;
+	double y;
+	double length;
+	double width;
 
-	Zone(int x, int y,int l, int w):
+	Zone(double x, double y, double l, double w):
 		x(x), y(y), length(l), width(w)
 	{ }
 
@@ -43,19 +43,19 @@ private:
 	int zones_x;
 	int zones_y;
 
-	const double radius = 50.0;
+	const double radius = 15;
 
 public:
 	Checker(Zone zone) :
 		zone(zone),
-		zones_x(10),
-		zones_y(10)
+		zones_x(20),
+		zones_y(20)
 	{ }
 
 	void checkPoints(Points& points)
 	{
-		double size_x = zone.length / zones_x;
-		double size_y = zone.width / zones_y;
+		double size_x = static_cast<double>(zone.length) / zones_x;
+		double size_y = static_cast<double>(zone.width) / zones_y;
 		/*for (int i = 0; i < zones_x; ++i)
 		{
 			for (int j = 0; j < zones_y; ++j)
@@ -73,7 +73,7 @@ public:
 			}
 		}*/
 
-		std::map<Zone, Points> zones;
+		std::map<std::pair<int,int>, Points> zone_indexes;
 
 		for (Point& pt : points)
 		{
@@ -86,14 +86,12 @@ public:
 			{
 				int x = static_cast<int>(zone.x + i * size_x);
 				int y = static_cast<int>(zone.y + j * size_y);
-				
-				Zone zone(x, y, size_x, size_y);
 
 				/*if (zone_indexes.find(zone) == zone_indexes.end())
 					zone_indexes[zone] = Points();*/
 
 
-				zones[zone].AddPoint(pt);
+				zone_indexes[{i,j}].AddPoint(pt);
 			}
 
 			// маємо індекси зон, і відповідні точки які належать певній зоні
@@ -102,13 +100,13 @@ public:
 
 		double sq_radius = this->radius * this->radius;
 
-		for (const auto& pair : zones)
+		for (const auto& pair : zone_indexes)
 		{
 			if (pair.second.empty())
 				continue;
 
-			int x_avg = 0;
-			int y_avg = 0;
+			double x_avg = 0;
+			double y_avg = 0;
 
 			for (const Point& pt : pair.second)
 			{
@@ -133,7 +131,7 @@ public:
 				double dx = pt.x - weak_avg.x;
 				double dy = pt.y - weak_avg.y;
 
-				double distance = std::sqrt(dx * dx + dy * dy);
+				double distance = dx * dx + dy * dy;
 
 				if (distance <= sq_radius)
 				{
@@ -143,10 +141,10 @@ public:
 				}
 			}
 
-			if (counter > 0)
+			if (counter > 3)
 			{
-				x_avg /= counter;
-				y_avg /= counter;
+				x_avg /= static_cast<double>(counter);
+				y_avg /= static_cast<double>(counter);
 
 				Point strong_avg(x_avg, y_avg, 0, color(0, 0, 255, 255));
 				points.AddPoint(strong_avg);
