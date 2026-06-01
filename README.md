@@ -59,3 +59,7 @@ While the current version achieves optimal performance on a single thread, the a
 * **Graphics & Windowing:** SDL3 (Native Software/Hardware Accelerated Renderer)
 * **User Interface:** Dear ImGui (Immediate Mode)
 * **Build System:** CMake
+
+---
+## Demo
+<img width="800" height="800" alt="зображення" src="https://github.com/user-attachments/assets/0bd42e2e-9a63-4e7d-9382-1f8a1ed7b9e2" />
