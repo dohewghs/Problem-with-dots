@@ -5,7 +5,10 @@ struct AppConfig
     int zones_x = 20;
     int zones_y = 20;
     float radius = 15.0f;
+    float merge_radius = 25.0f;
+
     int min_points_for_strong = 3;
+    int min_points_for_weak = 3;
     bool show_grid = true;
     bool regenerate_points = false; // прапорець для тригеру генерації нових точок
 

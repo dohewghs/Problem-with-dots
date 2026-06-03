@@ -138,14 +138,16 @@ public:
 		return zones;
 	}
 
-	Points weakAverages(const Points& points, const AppConfig& config)
+	Points weakAverages(std::map<std::pair<int, int>, Points> zones, const AppConfig& config)
 	{
-		std::map<std::pair<int, int>, Points> zones = this->zoning(points, config);
-
 		Points weakAvg;
+
 		for (auto pair : zones)
 		{
 			if (pair.second.empty()) 
+				continue;
+
+			if (pair.second.size() < config.min_points_for_weak)
 				continue;
 
 			Point avg = pair.second.average();
@@ -155,6 +157,95 @@ public:
 		}
 
 		return weakAvg;
+	}
+
+	Points strongAverages(std::map<std::pair<int, int>, Points> zones, const AppConfig& config)
+	{
+		double sq_radius = config.radius * config.radius;
+		double sq_merge_radius = config.merge_radius * config.merge_radius;
+
+		std::vector<Point> temp_strong_points;
+
+		for (const auto& pair : zones)
+		{
+			if (pair.second.empty())
+				continue;
+
+			if (pair.second.size() < config.min_points_for_weak)
+				continue;
+
+			Point weak_avg = pair.second.average();
+
+			double x_strong_sum = 0.0;
+			double y_strong_sum = 0.0;
+			size_t counter = 0;
+			for (const Point& pt : pair.second)
+			{
+				double dx = pt.x - weak_avg.x;
+				double dy = pt.y - weak_avg.y;
+
+				if ((dx * dx + dy * dy) <= sq_radius)
+				{
+					x_strong_sum += pt.x;
+					y_strong_sum += pt.y;
+					++counter;
+				}
+			}
+
+
+			if (counter > config.min_points_for_strong)
+			{
+				double x_strong = x_strong_sum / counter;
+				double y_strong = y_strong_sum / counter;
+
+				temp_strong_points.push_back(Point(x_strong, y_strong, 0, color(0,0,255,255)));
+			}
+		}
+
+		Points final_strong;
+		std::vector<bool> visited(temp_strong_points.size(), false);
+
+		for (size_t i = 0; i < temp_strong_points.size(); ++i)
+		{
+			if (visited[i])
+				continue;
+
+			double final_x = temp_strong_points[i].x;
+			double final_y = temp_strong_points[i].y;
+
+			size_t merged_count = 1;
+
+			visited[i] = true;
+
+			for (size_t j = i + 1; j < temp_strong_points.size(); ++j)
+			{
+				if (visited[j])
+					continue;
+
+				double dx = temp_strong_points[i].x - temp_strong_points[j].x;
+				double dy = temp_strong_points[i].y - temp_strong_points[j].y;
+
+				if ((dx * dx + dy * dy) <= sq_merge_radius)
+				{
+					final_x += temp_strong_points[j].x;
+					final_y += temp_strong_points[j].y;
+					++merged_count;
+
+					visited[j] = true;
+				}
+			}
+
+			Point absolute_center(
+				final_x / merged_count,
+				final_y / merged_count,
+				0,
+				color(0, 0, 255, 255)
+			);
+
+			final_strong.AddPoint(absolute_center);
+		}
+
+		return final_strong;
 	}
 };
 

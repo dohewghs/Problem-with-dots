@@ -58,7 +58,10 @@ int main()
 
 		Points working_dots = points; // Скидаємо старі центри перед перерахунком
 		
-		Points weakAvg = checker.weakAverages(points, config);
+		std::map<std::pair<int, int>, Points> zones = checker.zoning(working_dots, config);
+
+		Points weakAvg = checker.weakAverages(zones, config);
+		Points strongAvg = checker.strongAverages(zones, config);
 
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		SDL_RenderClear(renderer);
@@ -72,6 +75,7 @@ int main()
 
 		SDL_RenderPoints(renderer, points, config, 1.5);
 		SDL_RenderPoints(renderer, weakAvg, config, 2);
+		SDL_RenderPoints(renderer, strongAvg, config, 2);
 
 		SDL_SetRenderScale(renderer, 1, 1);
 		gui.render(renderer);

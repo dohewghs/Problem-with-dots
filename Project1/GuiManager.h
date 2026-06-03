@@ -45,7 +45,9 @@ public:
         ImGui::Separator();
         ImGui::Text("Cluster Parameters:");
         ImGui::SliderFloat("Search Radius", &config.radius, 1.0f, 100.0f, "%.1f");
-        ImGui::SliderInt("Min Points", &config.min_points_for_strong, 1, 20);
+        ImGui::SliderFloat("Merge Radius", &config.merge_radius, 1.0f, 100.0f, "%.1f");
+        ImGui::SliderInt("Min Points for strong", &config.min_points_for_strong, 1, 20);
+        ImGui::SliderInt("Min Points for weak", &config.min_points_for_weak, 1, 20);
 
         ImGui::Separator();
         ImGui::Checkbox("Show Grid Lines", &config.show_grid);
