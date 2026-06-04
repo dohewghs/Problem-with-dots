@@ -65,7 +65,7 @@ public:
 		{
 			for (int j = 1; j <= m; ++j)
 			{
-				dots.AddPoint(Point(step_x * j, step_y * i, 1, color(0, 0, 0)));
+				dots.AddPoint(Point(step_x * j, step_y * i, 1));
 			}
 		}
 		Points points = this->genPoints(dots);
@@ -89,7 +89,7 @@ public:
 			// std::rand() дає число від 0 до RAND_MAX. Переводимо в діапазон [0, zoneSize]
 			double rx = startX + (static_cast<double>(std::rand()) / RAND_MAX) * zoneSize;
 			double ry = startY + (static_cast<double>(std::rand()) / RAND_MAX) * zoneSize;
-			dots.AddPoint(Point(rx, ry, 0.0, color(0, 0, 0, 255)));
+			dots.AddPoint(Point(rx, ry, 0.0));
 		}
 
 		// 2. Створюємо 4 чіткі скупчення (кластери) точок.
@@ -116,7 +116,7 @@ public:
 				double offsetX = ((static_cast<double>(std::rand()) / RAND_MAX) * 30.0) - 15.0;
 				double offsetY = ((static_cast<double>(std::rand()) / RAND_MAX) * 30.0) - 15.0;
 
-				dots.AddPoint(Point(cx + offsetX, cy + offsetY, 0.0, color(0, 0, 0, 255)));
+				dots.AddPoint(Point(cx + offsetX, cy + offsetY, 0.0));
 			}
 		}
 

@@ -151,7 +151,6 @@ public:
 				continue;
 
 			Point avg = pair.second.average();
-			avg.col.R = 255;
 
 			weakAvg.AddPoint(avg);
 		}
@@ -198,7 +197,7 @@ public:
 				double x_strong = x_strong_sum / counter;
 				double y_strong = y_strong_sum / counter;
 
-				temp_strong_points.push_back(Point(x_strong, y_strong, 0, color(0,0,255,255)));
+				temp_strong_points.push_back(Point(x_strong, y_strong, 0));
 			}
 		}
 
@@ -238,8 +237,7 @@ public:
 			Point absolute_center(
 				final_x / merged_count,
 				final_y / merged_count,
-				0,
-				color(0, 0, 255, 255)
+				0
 			);
 
 			final_strong.AddPoint(absolute_center);

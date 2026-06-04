@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClInclude Include="AppConfig.h" />
     <ClInclude Include="Checker.h" />
+    <ClInclude Include="color.h" />
     <ClInclude Include="Functions.h" />
     <ClInclude Include="GuiManager.h" />
     <ClInclude Include="Point.h" />

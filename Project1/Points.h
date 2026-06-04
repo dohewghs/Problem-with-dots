@@ -60,8 +60,7 @@ public:
 		return Point(
 			x_avg / size, 
 			y_avg / size, 
-			z_avg / size, 
-			color(0, 0, 0, 255)
+			z_avg / size
 		);
 	}
 

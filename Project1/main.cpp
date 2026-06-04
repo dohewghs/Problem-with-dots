@@ -5,9 +5,10 @@
 #include <SDL3/SDL.h>
 #include "GuiManager.h"
 #include "Functions.h"
-void SDL_RenderPoint(SDL_Renderer* renderer, Point pt, const AppConfig& config, float point_size = 1);
-void SDL_RenderPoints(SDL_Renderer* renderer, const Points& points, const AppConfig& config, float point_size = 1);
-void drawGridLines(SDL_Renderer* renderer, const Zone& main_zone, const AppConfig& config);
+#include "color.h"
+void SDL_RenderPoint(SDL_Renderer* renderer, Point pt, const AppConfig& config, float point_size = 1, const color& col = color(0,0,0,255));
+void SDL_RenderPoints(SDL_Renderer* renderer, const Points& points, const AppConfig& config, float point_size = 1, const color& col = color(0,0,0,255));
+void drawGridLines(SDL_Renderer* renderer, const Zone& main_zone, const AppConfig& config, const color& col = color(200,200,200,255));
 
 int main()
 {
@@ -73,9 +74,9 @@ int main()
 			drawGridLines(renderer, mainSurface, config);
 		}
 
-		SDL_RenderPoints(renderer, points, config, 1.5);
-		SDL_RenderPoints(renderer, weakAvg, config, 2);
-		SDL_RenderPoints(renderer, strongAvg, config, 2);
+		SDL_RenderPoints(renderer, points, config, 1.5, color(0,0,0,255));
+		SDL_RenderPoints(renderer, weakAvg, config, 2, color(0,255,0,255));
+		SDL_RenderPoints(renderer, strongAvg, config, 2, color(255,0,0,255));
 
 		SDL_SetRenderScale(renderer, 1, 1);
 		gui.render(renderer);
@@ -89,9 +90,9 @@ int main()
 	return 0;
 }
 
-void SDL_RenderPoint(SDL_Renderer* renderer, Point pt, const AppConfig& config, float point_size)
+void SDL_RenderPoint(SDL_Renderer* renderer, Point pt, const AppConfig& config, float point_size, const color& col)
 {
-	SDL_SetRenderDrawColor(renderer, pt.col.R, pt.col.G, pt.col.B, pt.col.A);
+	SDL_SetRenderDrawColor(renderer, col.R, col.G, col.B, col.A);
 
 	SDL_FPoint screen_pos = Camera::WorldToScreen(pt.x, pt.y, config);
 
@@ -112,15 +113,15 @@ void SDL_RenderPoint(SDL_Renderer* renderer, Point pt, const AppConfig& config, 
 	}
 }
 
-void SDL_RenderPoints(SDL_Renderer* renderer, const Points& points, const AppConfig& config, float point_size)
+void SDL_RenderPoints(SDL_Renderer* renderer, const Points& points, const AppConfig& config, float point_size, const color& col)
 {
 	for (const auto& pt : points)
 	{
-		SDL_RenderPoint(renderer, pt, config, point_size);
+		SDL_RenderPoint(renderer, pt, config, point_size, col);
 	}
 }
 
-void drawGridLines(SDL_Renderer* renderer, const Zone& main_zone, const AppConfig& config)
+void drawGridLines(SDL_Renderer* renderer, const Zone& main_zone, const AppConfig& config, const color& col)
 {
 	double size_x = main_zone.length / config.zones_x;
 	double size_y = main_zone.width / config.zones_y;
