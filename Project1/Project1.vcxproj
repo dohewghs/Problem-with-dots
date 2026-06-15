@@ -129,12 +129,18 @@
   <ItemGroup>
     <ClInclude Include="AppConfig.h" />
     <ClInclude Include="Checker.h" />
+    <ClInclude Include="ClusteringResult.h" />
     <ClInclude Include="color.h" />
     <ClInclude Include="Functions.h" />
     <ClInclude Include="GuiManager.h" />
+    <ClInclude Include="IClusteringStrategy.h" />
+    <ClInclude Include="MultiThreadStrategy.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="Points.h" />
     <ClInclude Include="PointsGenerator.h" />
+    <ClInclude Include="SingleThreadStrategy.h" />
+    <ClInclude Include="ThreadsManager.h" />
+    <ClInclude Include="Zone.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Checker.cpp" />

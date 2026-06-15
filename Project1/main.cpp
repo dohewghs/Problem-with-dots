@@ -6,6 +6,7 @@
 #include "Functions.h"
 #include "color.h"
 #include "SingleThreadStrategy.h"
+#include "MultiThreadStrategy.h"
 
 int main()
 {
@@ -24,7 +25,8 @@ int main()
 
 	Points points = gen.get_points_preset2(width, height);
 
-	IClusteringStrategy* clustering_strategy = new SingleThreadStrategy(mainSurface);
+	//IClusteringStrategy* clustering_strategy = new SingleThreadStrategy(mainSurface);
+	IClusteringStrategy* clustering_strategy = new MultiThreadStrategy(mainSurface);
 
 	bool isRunning = true;
 	while (isRunning)
