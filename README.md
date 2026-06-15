@@ -48,8 +48,8 @@ Thanks to the decoupled design, you can dynamically tweak the spatial configurat
 While the current version achieves optimal performance on a single thread, the architecture was intentionally designed to adapt to **Parallel Processing**:
 
 * [x] **Single-Threaded Baseline:** Establish clean mathematics, UI integration, and floating-point stability.
-* [ ] **Data-Parallel Mapping:** Parallelize the initial point-cloud classification using data-splitting structures.
-* [ ] **Thread & Mutex Isolation:** Implement safe concurrent writes to the sparse spatial map cells using localized mutex guards or lock-free strategies.
+* [x] **Data-Parallel Mapping:** Parallelize the initial point-cloud classification using data-splitting structures.
+* [x] **Thread & Mutex Isolation:** Implement safe concurrent writes to the sparse spatial map cells using localized mutex guards or lock-free strategies.
 * [ ] **Task-Based Grid Analysis:** Distribute the Stage 2 radial centroid calculations across thread pools utilizing modern `std::jthread` (C++20).
 
 ---
