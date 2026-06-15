@@ -1,40 +1,10 @@
 #pragma once
 #include "Points.h"
 #include <iostream>
-#include <map>
+#include <vector>
 #include <numeric>
 #include "AppConfig.h"
-
-struct Zone
-{
-	//length, width, height
-	double x;
-	double y;
-	double length;
-	double width;
-
-	Zone(double x, double y, double l, double w):
-		x(x), y(y), length(l), width(w)
-	{ }
-
-	constexpr bool contains(const Point& point) const noexcept 
-	{
-		return point.x >= x && point.x < (x + length) &&
-			point.y >= y && point.y < (y + width);
-	}
-
-	bool operator<(const Zone& other) const 
-	{
-		if (x != other.x) 
-			return x < other.x;
-		if (y != other.y) 
-			return y < other.y;
-		if (length != other.length) 
-			return length < other.length;
-
-		return width < other.width;
-	}
-};
+#include "Functions.h"
 
 class Checker
 {
@@ -44,62 +14,15 @@ private:
 public:
 	Checker(Zone zone) :
 		zone(zone)
-	{ }
+	{ }	
 
-	//void checkPoints(const Points& points)
-	//{
-	//	
-
-	//	double sq_radius = this->radius * this->radius;
-
-	//	for (const auto& pair : zones)
-	//	{
-	//		if (pair.second.empty())
-	//			continue;
-
-	//		Point weak_avg = pair.second.average();
-	//		weak_avg.col.R = 255;
-	//		// weak_avg - середнє значення в зоні - квадраті
-
-	//		points.AddPoint(weak_avg);
-
-	//		double x_avg = 0;
-	//		double y_avg = 0;
-
-	//		size_t counter = 0;
-	//		for (const Point& pt : pair.second)
-	//		{
-	//			double dx = pt.x - weak_avg.x;
-	//			double dy = pt.y - weak_avg.y;
-
-	//			double distance = dx * dx + dy * dy;
-
-	//			if (distance <= sq_radius)
-	//			{
-	//				x_avg += pt.x;
-	//				y_avg += pt.y;
-	//				++counter;
-	//			}
-	//		}
-
-	//		if (counter > 3)
-	//		{
-	//			x_avg /= static_cast<double>(counter);
-	//			y_avg /= static_cast<double>(counter);
-
-	//			Point strong_avg(x_avg, y_avg, 0, color(0, 0, 255, 255));
-	//			points.AddPoint(strong_avg);
-	//		}
-
-	//	}
-	//}
-
-	std::map<std::pair<int, int>, Points> zoning(const Points& source, const AppConfig& config)
+	std::vector<Points> zoning(const Points& source, const AppConfig& config)
 	{
 		double size_x = static_cast<double>(zone.length) / config.zones_x;
 		double size_y = static_cast<double>(zone.width) / config.zones_y;
 	
-		std::map<std::pair<int, int>, Points> zones;
+		int total_cells = config.zones_x * config.zones_y;
+		std::vector<Points> zones(total_cells);
 
 		/*for (int i = 0; i < zones_x; ++i)
 		{
@@ -125,10 +48,9 @@ public:
 			// 0<j<zones_y
 			if (0 <= i && 0 <= j && i < config.zones_x && j < config.zones_y)
 			{
-				int x = static_cast<int>(zone.x + i * size_x);
-				int y = static_cast<int>(zone.y + j * size_y);
+				size_t index = GridMath::index_1D(i, j, config.zones_x);
 
-				zones[{i, j}].AddPoint(pt);
+				zones[index].AddPoint(pt);
 			}
 
 			// маємо індекси зон, і відповідні точки які належать певній зоні
@@ -138,47 +60,24 @@ public:
 		return zones;
 	}
 
-	Points weakAverages(std::map<std::pair<int, int>, Points> zones, const AppConfig& config)
-	{
-		Points weakAvg;
-
-		for (auto pair : zones)
-		{
-			if (pair.second.empty()) 
-				continue;
-
-			if (pair.second.size() < config.min_points_for_weak)
-				continue;
-
-			Point avg = pair.second.average();
-
-			weakAvg.AddPoint(avg);
-		}
-
-		return weakAvg;
-	}
-
-	Points strongAverages(std::map<std::pair<int, int>, Points> zones, const AppConfig& config)
+	std::vector<Point> collect_local_strong(const std::vector<Points>& zones, const AppConfig& config, size_t start_index, size_t end_index)
 	{
 		double sq_radius = config.radius * config.radius;
-		double sq_merge_radius = config.merge_radius * config.merge_radius;
+		
+		std::vector<Point> local_strong_points;
 
-		std::vector<Point> temp_strong_points;
-
-		for (const auto& pair : zones)
+		for (size_t i = start_index; i < end_index; i++)
 		{
-			if (pair.second.empty())
+			if (zones[i].empty() ||
+				zones[i].size() < config.min_points_for_strong)
 				continue;
 
-			if (pair.second.size() < config.min_points_for_weak)
-				continue;
-
-			Point weak_avg = pair.second.average();
+			Point weak_avg = zones[i].average();
 
 			double x_strong_sum = 0.0;
 			double y_strong_sum = 0.0;
-			size_t counter = 0;
-			for (const Point& pt : pair.second)
+			size_t count = 0;
+			for (const Point& pt : zones[i])
 			{
 				double dx = pt.x - weak_avg.x;
 				double dy = pt.y - weak_avg.y;
@@ -187,21 +86,27 @@ public:
 				{
 					x_strong_sum += pt.x;
 					y_strong_sum += pt.y;
-					++counter;
+					++count;
 				}
 			}
 
-
-			if (counter > config.min_points_for_strong)
+			if (count >= config.min_points_for_strong)
 			{
-				double x_strong = x_strong_sum / counter;
-				double y_strong = y_strong_sum / counter;
+				double x_strong = x_strong_sum / count;
+				double y_strong = y_strong_sum / count;
 
-				temp_strong_points.push_back(Point(x_strong, y_strong, 0));
+				local_strong_points.push_back(Point(x_strong, y_strong, 0));
 			}
 		}
 
+		return local_strong_points;
+	}
+
+	Points mergeCloseCenters(const std::vector<Point>& temp_strong_points, const AppConfig& config)
+	{
+		double sq_merge_radius = config.merge_radius * config.merge_radius;
 		Points final_strong;
+
 		std::vector<bool> visited(temp_strong_points.size(), false);
 
 		for (size_t i = 0; i < temp_strong_points.size(); ++i)
@@ -209,9 +114,11 @@ public:
 			if (visited[i])
 				continue;
 
-			double final_x = temp_strong_points[i].x;
-			double final_y = temp_strong_points[i].y;
+			double base_x = temp_strong_points[i].x;
+			double base_y = temp_strong_points[i].y;
 
+			double sum_x = base_x;
+			double sum_y = base_y;
 			size_t merged_count = 1;
 
 			visited[i] = true;
@@ -221,13 +128,13 @@ public:
 				if (visited[j])
 					continue;
 
-				double dx = temp_strong_points[i].x - temp_strong_points[j].x;
-				double dy = temp_strong_points[i].y - temp_strong_points[j].y;
+				double dx = temp_strong_points[j].x - base_x;
+				double dy = temp_strong_points[j].y - base_y;
 
 				if ((dx * dx + dy * dy) <= sq_merge_radius)
 				{
-					final_x += temp_strong_points[j].x;
-					final_y += temp_strong_points[j].y;
+					sum_x += temp_strong_points[j].x;
+					sum_y += temp_strong_points[j].y;
 					++merged_count;
 
 					visited[j] = true;
@@ -235,8 +142,8 @@ public:
 			}
 
 			Point absolute_center(
-				final_x / merged_count,
-				final_y / merged_count,
+				sum_x / merged_count,
+				sum_y / merged_count,
 				0
 			);
 
