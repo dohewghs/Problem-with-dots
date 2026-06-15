@@ -1,14 +1,11 @@
+#include <SDL3/SDL.h>
 #include "Points.h"
 #include "PointsGenerator.h"
-#include "Checker.h"
 #include "AppConfig.h"
-#include <SDL3/SDL.h>
 #include "GuiManager.h"
 #include "Functions.h"
 #include "color.h"
-void SDL_RenderPoint(SDL_Renderer* renderer, Point pt, const AppConfig& config, float point_size = 1, const color& col = color(0,0,0,255));
-void SDL_RenderPoints(SDL_Renderer* renderer, const Points& points, const AppConfig& config, float point_size = 1, const color& col = color(0,0,0,255));
-void drawGridLines(SDL_Renderer* renderer, const Zone& main_zone, const AppConfig& config, const color& col = color(200,200,200,255));
+#include "SingleThreadStrategy.h"
 
 int main()
 {
@@ -23,10 +20,11 @@ int main()
 	AppConfig config;
 	GuiManager gui(window, renderer);
 	Zone mainSurface(0, 0, width, height);
-	Checker checker(mainSurface);
 	PointsGenerator gen(std::random_device{}());
 
 	Points points = gen.get_points_preset2(width, height);
+
+	IClusteringStrategy* clustering_strategy = new SingleThreadStrategy(mainSurface);
 
 	bool isRunning = true;
 	while (isRunning)
@@ -53,16 +51,13 @@ int main()
 
 		if (config.regenerate_points) 
 		{
-			//original_dots = generateTestPoints();
+			//points = generateTestPoints();
 			config.regenerate_points = false;
 		}
 
 		Points working_dots = points; // Скидаємо старі центри перед перерахунком
 		
-		std::map<std::pair<int, int>, Points> zones = checker.zoning(working_dots, config);
-
-		Points weakAvg = checker.weakAverages(zones, config);
-		Points strongAvg = checker.strongAverages(zones, config);
+		ClusteringResult after_clustering = clustering_strategy->proccess(working_dots, config);
 
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		SDL_RenderClear(renderer);
@@ -71,12 +66,32 @@ int main()
 
 		if (config.show_grid) 
 		{
-			drawGridLines(renderer, mainSurface, config);
+			Render::drawGridLines(renderer, mainSurface, config, color(100,100,100,255));
 		}
 
-		SDL_RenderPoints(renderer, points, config, 1.5, color(0,0,0,255));
-		SDL_RenderPoints(renderer, weakAvg, config, 2, color(0,255,0,255));
-		SDL_RenderPoints(renderer, strongAvg, config, 2, color(255,0,0,255));
+		Render::SDL_RenderPoints(
+			renderer,
+			working_dots,
+			config,
+			1.5,
+			color(0, 200, 0, 255)
+		);
+
+		Render::SDL_RenderPoints(
+			renderer, 
+			after_clustering.filtered_geometry, 
+			config, 
+			1.5, 
+			color(0,0,0,255)
+		);
+
+		Render::SDL_RenderPoints(
+			renderer, 
+			after_clustering.cluster_centers, 
+			config, 
+			2, 
+			color(255,0,0,255)
+		);
 
 		SDL_SetRenderScale(renderer, 1, 1);
 		gui.render(renderer);
@@ -88,63 +103,4 @@ int main()
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 	return 0;
-}
-
-void SDL_RenderPoint(SDL_Renderer* renderer, Point pt, const AppConfig& config, float point_size, const color& col)
-{
-	SDL_SetRenderDrawColor(renderer, col.R, col.G, col.B, col.A);
-
-	SDL_FPoint screen_pos = Camera::WorldToScreen(pt.x, pt.y, config);
-
-	if (point_size <= 1)
-	{
-		SDL_RenderPoint(renderer, screen_pos.x, screen_pos.y);
-	}
-	else
-	{
-		SDL_FRect rect{
-		screen_pos.x - point_size / 2,
-		screen_pos.y - point_size / 2,
-		point_size,
-		point_size
-		};
-
-		SDL_RenderFillRect(renderer, &rect);
-	}
-}
-
-void SDL_RenderPoints(SDL_Renderer* renderer, const Points& points, const AppConfig& config, float point_size, const color& col)
-{
-	for (const auto& pt : points)
-	{
-		SDL_RenderPoint(renderer, pt, config, point_size, col);
-	}
-}
-
-void drawGridLines(SDL_Renderer* renderer, const Zone& main_zone, const AppConfig& config, const color& col)
-{
-	double size_x = main_zone.length / config.zones_x;
-	double size_y = main_zone.width / config.zones_y;
-
-	SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
-
-	for (int i = 0; i <= config.zones_x; ++i)
-	{
-		float world_x = static_cast<float>(main_zone.x + i * size_x);
-		
-		SDL_FPoint top = Camera::WorldToScreen(world_x, main_zone.y, config);
-		SDL_FPoint bottom = Camera::WorldToScreen(world_x, main_zone.y + main_zone.width, config);
-
-		SDL_RenderLine(renderer, top.x, top.y, bottom.x, bottom.y);
-	}
-
-	for (int j = 0; j <= config.zones_y; ++j)
-	{
-		float world_y = static_cast<float>(main_zone.y + j * size_y);
-		
-		SDL_FPoint left = Camera::WorldToScreen(main_zone.x, world_y, config);
-		SDL_FPoint right = Camera::WorldToScreen(main_zone.x+main_zone.length, world_y, config);
-
-		SDL_RenderLine(renderer, left.x, left.y, right.x, right.y);
-	}
 }
