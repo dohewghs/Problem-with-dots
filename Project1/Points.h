@@ -48,7 +48,7 @@ public:
 		double y_avg = 0;
 		double z_avg = 0;
 
-		for (Point pt : this->dots)
+		for (const Point& pt : this->dots)
 		{
 			x_avg += pt.x;
 			y_avg += pt.y;
